@@ -1,11 +1,9 @@
-# cbbMM
-theoretical predictor of march madness matchups
-
-
+# cbb
+theoretical predictor of basketball matchups
 
 uses personal preferences of what is most important -> adjusted efficiency > steals/turnovers > rebounding > 3s > 2s > free throws
 
-
+compared to March Madness 2019 results
 
 links for data used: 
 
