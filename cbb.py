@@ -6,25 +6,25 @@
 
 class Team:
 
-# -> add conference to adjust rebounding values
     # initialize
-    def __init__ (self, school, conference, adjMargin, steals, turnovers, offRebounds, 
-                    reboundMargin, fgMade, fgAtt, threeMade, threeAtt, ftPct, 
-                    fouls, gamesPlayed):
+    def __init__ (self, school, conference, adjMargin, turnoversPerPossPct, oppTurnoversPerPossPct, 
+                    offReboundPct, defReboundPct, fgMade, fgAtt, threeMade, threeAtt, 
+                    oppTwoPct, oppThreePct, ftPct, foulsPerPossPct):
         self._school = school
         self._conference = conference
         self._adjMargin = adjMargin
-        self._steals = steals                           
-        self._turnovers = turnovers                   
-        self._offRebounds = offRebounds                 # all season totals
-        self._reboundMargin = reboundMargin           
-        self._fgMade = fgMade                    
-        self._threeMade = threeMade                 
-        self._fgAtt = fgAtt                           
-        self._threeAtt = threeAtt                      
+        self._TOPerPossPct = turnoversPerPossPct                           
+        self._oppTOPerPossPct = oppTurnoversPerPossPct                   
+        self._offRebPct = offReboundPct                 
+        self._defRebPct = defReboundPct           
+        self._fgMade = fgMade        
+        self._fgAtt = fgAtt                 
+        self._threeMade = threeMade                                       
+        self._threeAtt = threeAtt   
+        self._oppTwoPct = oppTwoPct
+        self._oppThreePct = oppThreePct                   
         self._freeThrowPct = ftPct                   
-        self._fouls = fouls                          
-        self._gamesPlayed = gamesPlayed
+        self._foulsPerPoss = foulsPerPossPct                          
 
     # simple gets
     def getSchool (self):
@@ -33,10 +33,14 @@ class Team:
         return self._conference
     def getAdjMargin (self):
         return self._adjMargin
-    def getSteals (self):
-        return self._steals
-    def getOffRebounds (self):
-        return self._offRebounds
+    def getTOPerPossPct (self):
+        return self._TOPerPossPct
+    def getOppTOPerPossPct (self):
+        return self._oppTOPerPossPct
+    def getOffRebPct (self):
+        return self._offRebPct
+    def getDefRebPct (self):
+        return self._defRebPct
     def getFgMade (self):
         return self._fgMade
     def getFgAtt (self):
@@ -45,44 +49,16 @@ class Team:
         return self._threeMade
     def getThreeAtt (self):
         return self._threeAtt
-    def getGamesPlayed (self):
-        return self._gamesPlayed
+    def getOppTwoPct (self):
+        return self._oppTwoPct
+    def getOppThreePct (self):
+        return self._oppThreePct
+    def getFoulsPerPoss (self):
+        return self._foulsPerPoss
 
-    # get per games
-    def getStealsPerGame (self):
-        stealsPerGame = self._steals / self.getGamesPlayed()
-        return stealsPerGame
-    def getTurnoversPerGame (self):
-        turnoversPerGame = self.adjustTurnovers() / self.getGamesPlayed()
-        return turnoversPerGame
-    def getReboundMarginPerGame (self):
-        reboundMarginPerGame = self.adjustReboundMargin() / self.getGamesPlayed()
-        return reboundMarginPerGame
-    def getTwosPerGame (self):
-        twosMade = self.adjustFgMade() - self.adjustThreeMade()
-        twosPG = twosMade / self.getGamesPlayed()
-        return twosPG
-    def getThreesPerGame (self):
-        threePG = self.adjustThreeMade() / self.getGamesPlayed()
-        return threePG
-    def getFoulsPerGame (self):
-        foulsPerGame = self.adjustFouls() / self.getGamesPlayed()
-        return foulsPerGame
-
-    # get percentages
+    # get percentages / rates
     def getFtPct (self):
         return self._freeThrowPct
-
-    def getOffReboundPct (self):
-        fgAttempts = self.getFgAtt()
-        fgMade = self.getFgMade()
-        missedShots = (fgAttempts - fgMade)
-        offPct = (self.adjustOffRebounds() / missedShots) * 100
-        return offPct
-
-    def getFgPct (self):
-        fgPct = (self.getFgMade() / self.getFgAtt()) * 100
-        return fgPct
 
     def getTwoPct (self):
         fgMade = self.getFgMade()
@@ -99,6 +75,18 @@ class Team:
         threePct = (self.getThreeMade() / self.getThreeMade()) * 100
         return threePct
 
+    def getTwoRate (self):
+        twosAtt = self.getFgAtt() - self.getThreeAtt()
+        fgAtt = self.getFgAtt()
+        twoRate = twosAtt / fgAtt
+        return twoRate
+
+    def getThreeRate (self):
+        threesAtt = self.getThreeAtt()
+        fgAtt = self.getFgAtt()
+        threeRate = threesAtt / fgAtt
+        return threeRate
+        
     # dictionary of major conferences and assigned multiplier
     conferenceAdjuster = {"B10"      : 5, 
                           "ACC"      : 4, 
@@ -121,18 +109,10 @@ class Team:
                           "Summit": 0, "Sun Belt": 0, "WAC": 0}
 
     # stat adjustments
+    '''
     def getMultiplier (self):
         multiplier = self.conferenceAdjuster[self.getConference()]
         return multiplier
-    def adjustTurnovers (self):
-        self._turnovers = self._turnovers - int (15 * self.getMultiplier())
-        return self._turnovers
-    def adjustOffRebounds (self):
-        self._offRebounds = self._offRebounds + int (15 * self.getMultiplier())
-        return self._offRebounds
-    def adjustReboundMargin (self):
-        self._reboundMargin = self._reboundMargin + int (40 * self.getMultiplier())
-        return self._reboundMargin
     def adjustFgMade (self):
         self._fgMade = self._fgMade + int (100 * self.getMultiplier())   
         return self._fgMade
@@ -141,7 +121,7 @@ class Team:
         return self._threeMade
     def adjustFouls (self):
         self._fouls = self._fouls - int (35 * self.getMultiplier())
-        return self._fouls
+        return self._fouls '''
 
 
 ############################################################
@@ -187,27 +167,21 @@ class Game:
 
     # determine if there is a great turnover difference 
     def turnoverDifferential (self):
-        spgOne = self._teamOne.getStealsPerGame()
-        spgTwo = self._teamTwo.getStealsPerGame()
-        tpgOne = self._teamOne.getTurnoversPerGame()
-        tpgTwo = self._teamTwo.getTurnoversPerGame()
+        TOPctOne = self._teamOne.getTOPerPossPct()
+        TOPctTwo = self._teamTwo.getTOPerPossPct()
+        oppTOPctOne = self._teamOne.getOppTOPerPossPct()
+        oppTOPctTwo = self._teamTwo.getOppTOPerPossPct()
 
         winner = ""
         canDetermine = False
+        thresholdGap = 3
 
-        turnoverOne = (tpgOne + spgTwo) / 2
-        turnoverTwo = (tpgTwo + spgOne) / 2
+        turnoverOne = (TOPctOne + oppTOPctTwo) / 2 
+        turnoverTwo = (TOPctTwo + oppTOPctOne) / 2   
         turnoverDiff = turnoverOne - turnoverTwo
         absDiff = abs(turnoverDiff)
 
-        # team rebounds per game - opponents rpg
-        avgTODifferentialPerGame = 13.0 - 12.8
-        avgStealsPerGame = 6.8 - 6.5
-        avgGamesPlayed = int ((self._teamOne.getGamesPlayed() + self._teamTwo.getGamesPlayed()) / 2)
-
-        avgDiff = avgTODifferentialPerGame * avgStealsPerGame
-
-        if (absDiff >= avgDiff * avgGamesPlayed):
+        if (absDiff >= thresholdGap):
             canDetermine = True
             if (turnoverDiff > 0):
                 winner = self._teamTwo.getSchool()
@@ -221,26 +195,25 @@ class Game:
 
     # determine if there is a great advantage in rebounding
     def reboundDifferential (self):
-        offPctOne = self._teamOne.getOffReboundPct()
-        offPctTwo = self._teamTwo.getOffReboundPct()
+        offPctOne = self._teamOne.getOffRebPct()
+        offPctTwo = self._teamTwo.getOffRebPct()
+        defPctOne = self._teamOne.getDefRebPct()
+        defPctTwo = self._teamTwo.getDefRebPct()
 
-        rebMarginOne = self._teamOne.getReboundMarginPerGame()
-        rebMarginTwo = self._teamTwo.getReboundMarginPerGame()
-        rebMarginDiff = rebMarginOne - rebMarginTwo
-        absMarginDiff = abs(rebMarginDiff)
+        offRebMargin = offPctOne - offPctTwo
+        defRebMargin = defPctOne - defPctTwo
+        totRebMargin = offRebMargin + defRebMargin
+        absMargin = abs(totRebMargin)
 
         winner = ""
         canDetermine = False
+        thresholdGap = 5
 
-        # team rebounds per game - opponents rpg
-        avgReboundMarginPerGame = 35.05 - 34.9
-        avgGamesPlayed = int ((self._teamOne.getGamesPlayed() + self._teamTwo.getGamesPlayed()) / 2)
-
-        if (absMarginDiff >= avgReboundMarginPerGame * avgGamesPlayed):
-            if (rebMarginDiff > 0 and offPctOne > 27):
+        if (absMargin >= thresholdGap):
+            if (totRebMargin > 0 and offPctOne > 27):
                 canDetermine = True
                 winner = self._teamOne.getSchool()
-            elif (rebMarginDiff < 0 and offPctTwo > 27):
+            elif (totRebMargin < 0 and offPctTwo > 27):
                 canDetermine = True
                 winner = self._teamTwo.getSchool()
 
@@ -251,27 +224,31 @@ class Game:
 
     # determine if there is a great advantage in three point shooting
     def threeDifferential (self):
-        threesOne = self._teamOne.getThreesPerGame()
-        threesTwo = self._teamTwo.getThreesPerGame()
         threePctOne = self._teamOne.getThreePct()
         threePctTwo = self._teamTwo.getThreePct()
+        threeRateOne = self._teamOne.getThreeRate()
+        threeRateTwo = self._teamTwo.getThreeRate()
+        oppThreePctOne = self._teamOne.getOppThreePct()
+        oppThreePctTwo = self._teamTwo.getOppThreePct()
+
+        combinedThreePctOne = (threePctOne + oppThreePctTwo) / 2
+        combinedThreePctTwo = (threePctTwo + oppThreePctOne) / 2
+
+        threesOne = combinedThreePctOne * threeRateOne
+        threesTwo = combinedThreePctTwo * threeRateTwo
 
         threeDiff = threesOne - threesTwo
         absDiff = abs(threeDiff)
-        avgThreePct = 33
 
         winner = ""
         canDetermine = False
+        thresholdGap = 5
 
-        # (ppg from 3 - opponent ppg from 3) / 3
-        avgThreesMadePerGame = (24.05 - 22.9) / 3
-        avgGamesPlayed = int ((self._teamOne.getGamesPlayed() + self._teamTwo.getGamesPlayed()) / 2)
-
-        if (absDiff >= (avgThreesMadePerGame * avgGamesPlayed)):
-            if (threeDiff > 0 and threePctOne >= avgThreePct):
+        if (absDiff >= thresholdGap):
+            if (threeDiff > 0 and threeRateOne >= 0.4):
                 canDetermine = True
                 winner = self._teamOne.getSchool()
-            elif (threeDiff < 0 and threePctTwo >= avgThreePct):
+            elif (threeDiff < 0 and threeRateTwo >= 0.4):
                 canDetermine = True
                 winner = self._teamTwo.getSchool()
 
@@ -282,27 +259,31 @@ class Game:
 
     # determine if there is a great advantage in three point shooting
     def twoDifferential (self):  
-        twosOne = self._teamOne.getTwosPerGame()
-        twosTwo = self._teamTwo.getTwosPerGame() 
         twoPctOne = self._teamOne.getTwoPct()
         twoPctTwo = self._teamTwo.getTwoPct()
+        twoRateOne = self._teamOne.getTwoRate()
+        twoRateTwo = self._teamTwo.getTwoRate()
+        oppTwoPctOne = self._teamOne.getOppTwoPct()
+        oppTwoPctTwo = self._teamTwo.getOppTwoPct()
+
+        combinedThreePctOne = (twoPctOne + oppTwoPctTwo) / 2
+        combinedThreePctTwo = (twoPctTwo + oppTwoPctOne) / 2
+
+        twosOne = combinedThreePctOne * twoRateOne
+        twosTwo = combinedThreePctTwo * twoRateTwo
 
         twoDiff = twosOne - twosTwo
         absDiff = abs(twoDiff)
-        avgTwoPct = 50
-        
+
         winner = ""
         canDetermine = False
+        thresholdGap = 5
 
-        # (ppg from 2 - opponent ppg from 2) / 2
-        avgTwosMadePerGame = (35.55 - 34.95) / 2
-        avgGamesPlayed = int ((self._teamOne.getGamesPlayed() + self._teamTwo.getGamesPlayed()) / 2)
-
-        if (absDiff >= (avgTwosMadePerGame * avgGamesPlayed)):
-            if (twoDiff > 0 and twoPctOne >= avgTwoPct):
+        if (absDiff >= thresholdGap):
+            if (twoDiff > 0 and twoRateOne >= 0.6):
                 canDetermine = True
                 winner = self._teamOne.getSchool()
-            elif (twoDiff < 0 and twoPctTwo >= avgTwoPct):
+            elif (twoDiff < 0 and twoRateTwo >= 0.6):
                 canDetermine = True
                 winner = self._teamTwo.getSchool()
 
@@ -315,15 +296,15 @@ class Game:
     def freeThrows (self):
         ftPctOne = self._teamOne.getFtPct()
         ftPctTwo = self._teamTwo.getFtPct()
-        foulsOne = self._teamOne.getFoulsPerGame()
-        foulsTwo = self._teamTwo.getFoulsPerGame()
+        foulsOne = self._teamOne.getFoulsPerPoss()
+        foulsTwo = self._teamTwo.getFoulsPerPoss()
 
-        totalFtOne = ftPctOne * foulsTwo
-        totalFtTwo = ftPctTwo * foulsOne
+        ftOne = ftPctOne * foulsTwo
+        ftTwo = ftPctTwo * foulsOne
 
         winner = ""
 
-        if (totalFtOne > totalFtTwo):
+        if (ftOne > ftTwo):
             winner = self._teamOne.getSchool()
         else:
             winner = self._teamTwo.getSchool()
@@ -340,7 +321,7 @@ class Game:
                 howWin = "turnovers"
             else:
                 if (self.reboundDifferential() == True):
-                    howWin = "rebounding"
+                    howWin = "rebounds"
                 else:
                     if (self.threeDifferential() == True):
                         howWin = "threes"
@@ -365,30 +346,30 @@ class Game:
 ######         West Region  ->  12 / 15
 ########################################
 
-# name, effMargin, steals, TO, OR, rebMarg, FGM, FGA, 3PM, 3PA, FT%, PF, GP
-Wseed01 = Team ("Gonzaga"            , "WCC"      , 32.85, 278, 394, 354, 277, 1177, 2239, 287, 790, 76.1, 603, 37)
-Wseed16 = Team ("Fairleigh Dickinson", "Northeast", -4.22, 261, 477, 323, 35 , 921 , 1939, 269, 672, 72.5, 578, 35)
+# name, conf, effMargin, TO/poss, OTO/poss, ORB%, DRB%, FGM, FGA, 3PM, 3PA, o2%, o3%, FT%, PF, GP
+Wseed01 = Team ("Gonzaga"            , "WCC"      , 32.85, 14.5, 19.8, 30.0, 77.0, 1177, 2239, 287, 790, 43.4, 30.4, 76.1, 22.3)
+Wseed16 = Team ("Fairleigh Dickinson", "Northeast", -4.22, 19.3, 18.2, 26.9, 68.7, 921 , 1939, 269, 672, 51.3, 35.3, 72.5, 23.3)
 
-Wseed08 = Team ("Syracuse", "ACC", 15.13, 278, 423, 363, -79, 808, 1907, 274, 824, 68.5, 588, 34)
-Wseed09 = Team ("Baylor"  , "B12", 16.48, 209, 446, 450, 195, 869, 1966, 274, 803, 67.7, 636, 34)
+Wseed08 = Team ("Syracuse", "ACC", 15.13, 19.2, 20.4, 28.3, 69.2, 808, 1907, 274, 824, 46.9, 32.9, 68.5, 25.0)
+Wseed09 = Team ("Baylor"  , "B12", 16.48, 17.9, 26.4, 36.4, 72.9, 869, 1966, 274, 803, 47.5, 34.5, 67.7, 27.4)
 
-Wseed05 = Team ("Marquette"   , "Big East", 16.52, 168, 467, 331, 146, 893, 1969, 319, 822, 75.7, 635, 34)
-Wseed12 = Team ("Murray State", "OVC"     , 13.83, 249, 401, 351, 102, 988, 2007, 258, 731, 73.3, 527, 33)
+Wseed05 = Team ("Marquette"   , "Big East", 16.52, 18.8, 15.3, 26.9, 76.7, 893, 1969, 319, 822, 45.1, 32.4, 75.7, 25.5)
+Wseed12 = Team ("Murray State", "OVC"     , 13.83, 17.0, 20.5, 30.9, 71.8, 988, 2007, 258, 731, 48.3, 28.9, 73.3, 21.9)
 
-Wseed04 = Team ("Florida St", "ACC"         , 22.39, 266, 492, 418, 168, 960, 2171, 272, 819, 74.4, 705, 37)
-Wseed13 = Team ("Vermont"   , "America East", 8.86 , 188, 377, 304, 144, 864, 1887, 273, 761, 74.8, 568, 34)
+Wseed04 = Team ("Florida St", "ACC"         , 22.39, 18.5, 20.5, 31.9, 76.9, 960, 2171, 272, 819, 45.3, 33.5, 74.4, 26.5)
+Wseed13 = Team ("Vermont"   , "America East", 8.86 , 16.5, 20.4, 25.7, 80.0, 864, 1887, 273, 761, 46.3, 35.1, 74.8, 25.0)
 
-Wseed06 = Team ("Buffalo"   , "Mid American", 19.85, 263, 433, 452, 48 , 1083, 2344, 344, 1022, 68.7, 659, 36)
-Wseed11 = Team ("Arizona St", "P12", 11.55, 213, 466, 399, 133, 899, 2012, 240, 714, 68.0, 675, 34)
+Wseed06 = Team ("Buffalo"   , "Mid American", 19.85, 15.7, 16.3, 30.6, 74.8, 1083, 2344, 344, 1022, 49.3, 29.3, 68.7, 24.3)
+Wseed11 = Team ("Arizona St", "P12"         , 11.55, 18.2, 21.9, 29.6, 76.1, 899 , 2012, 240, 714 , 47.3, 33.4, 68.0, 26.3)
 
-Wseed03 = Team ("Texas Tech", "B12"    , 30.03, 278, 457, 315, 43 , 990, 2110, 277, 759, 73.2, 663, 38)
-Wseed14 = Team ("N Kentucky", "Horizon", 7.14 , 218, 441, 364, 157, 979, 2047, 306, 844, 66.6, 664, 35)
+Wseed03 = Team ("Texas Tech", "B12"    , 30.03, 17.4, 25.4, 26.3, 74.2, 990, 2110, 277, 759, 41.9, 29.8, 73.2, 25.2)
+Wseed14 = Team ("N Kentucky", "Horizon", 7.14 , 17.4, 20.7, 28.3, 76.8, 979, 2047, 306, 844, 49.9, 32.0, 66.6, 26.6)
 
-Wseed07 = Team ("Nevada" , "MWC", 18.18, 211, 352, 325, 88 , 924, 1999, 297, 855, 70.8, 584, 34)
-Wseed10 = Team ("Florida", "SEC", 18.30, 257, 420, 375, -41, 857, 2015, 291, 872, 72.1, 614, 36)
+Wseed07 = Team ("Nevada" , "MWC", 18.18, 14.3, 17.9, 25.7, 78.4, 924, 1999, 297, 855, 46.2, 33.3, 70.8, 23.7)
+Wseed10 = Team ("Florida", "SEC", 18.30, 17.4, 20.9, 29.1, 69.9, 857, 2015, 291, 872, 48.5, 31.6, 72.1, 25.4)
 
-Wseed02 = Team ("Michigan", "B10"    , 28.32, 225, 334, 299, 34, 941, 2102, 287, 839, 70.1, 514, 37)
-Wseed15 = Team ("Montana" , "Big Sky", 3.53 , 229, 416, 293, 82, 975, 1983, 287, 763, 68.9, 655, 35)
+Wseed02 = Team ("Michigan", "B10"    , 28.32, 13.5, 14.7, 21.9, 77.4, 941, 2102, 287, 839, 44.3, 29.1, 70.1, 20.9)
+Wseed15 = Team ("Montana" , "Big Sky", 3.53 , 17.0, 18.3, 24.2, 76.9, 975, 1983, 287, 763, 49.3, 34.4, 68.9, 27.4)
 
 Wgame1  = Game (Wseed01, Wseed16)
 Wgame2  = Game (Wseed08, Wseed09)
@@ -434,4 +415,78 @@ Wgame15 = Game (Wseed01, Wseed03)
 print(Wgame15.findWin())
 print()
 print()
+print()
+
+
+########################################
+######         South Region  ->  10 / 15
+########################################
+
+# name, effMargin, TO/poss, OTO/poss, ORB%, DRB%, FGM, FGA, 3PM, 3PA, o2%, o3%, FT%, PF, GP
+Sseed01 = Team ("Virginia"    , "ACC"      , 34.22, 14.4, 16.1, 28.6, 77.3, 974, 2056, 321, 813, 45.7, 28.9, 74.4, 22.8)
+Sseed16 = Team ("Gardner Webb", "Big South", -0.04, 16.6, 16.9, 20.0, 71.1, 955, 1962, 281, 719, 50.4, 33.7, 71.1, 22.7)
+
+Sseed08 = Team ("Mississippi", "SEC", 13.98, 17.7, 24.5, 27.7, 72.3, 876, 1906, 272, 760, 48.2, 37.4, 78.3, 25.6)
+Sseed09 = Team ("Oklahoma"   , "B12", 16.94, 16.6, 19.3, 23.3, 73.9, 883, 1975, 226, 654, 45.8, 33.3, 69.7, 21.7)
+
+Sseed05 = Team ("Wisconsin", "B10", 21.94, 14.3, 17.6, 23.1, 76.1, 874, 1945, 633, 1273, 44.1, 31.5, 64.8, 22.3)
+Sseed12 = Team ("Oregon"   , "P12", 17.86, 17.2, 21.1, 27.9, 74.8, 958, 2126, 663, 1286, 48.8, 29.0, 72.1, 25.9)
+
+Sseed04 = Team ("Kansas St", "B12"     , 20.06, 17.1, 19.6, 26.6, 76.1, 806, 1878, 241, 721 , 49.0, 31.4, 66.7, 24.4)
+Sseed13 = Team ("UC Irvine", "Big West", 9.16 , 17.0, 16.6, 31.6, 76.7, 987, 2159, 735, 1458, 40.7, 33.9, 70.2, 26.4)
+
+Sseed06 = Team ("Villanova", "Big East", 17.33, 16.1, 18.7, 29.7, 75.2, 884, 2019, 380, 1081, 49.7, 34.3, 72.8, 24.0)
+Sseed11 = Team ("St Marys" , "WCC"     , 17.31, 15.9, 16.5, 28.9, 78.7, 899, 1905, 253, 670 , 49.2, 32.1, 74.2, 25.7)
+
+Sseed03 = Team ("Purdue"      , "B10" , 26.81, 15.5, 16.3, 33.3, 74.9, 967, 2145, 365, 977, 47.2, 34.2, 71.9, 25.3)
+Sseed14 = Team ("Old Dominion", "CUSA", 5.45 , 17.3, 20.2, 31.3, 78.6, 823, 2026, 264, 756, 43.5, 32.4, 66.3, 24.7)
+
+Sseed07 = Team ("Cincinnati", "AAC", 17.50, 15.6, 18.3, 35.6, 73.1, 872, 2018, 232, 673, 45.1, 35.5, 70.4, 24.0)
+Sseed10 = Team ("Iowa"      , "B10", 16.02, 16.9, 17.9, 28.2, 71.9, 914, 2006, 285, 782, 53.5, 32.4, 73.9, 22.4)
+
+Sseed02 = Team ("Tennessee", "SEC"    , 26.24, 15.5, 24.8, 30.4, 72.5, 1106, 2231, 262, 714, 44.7, 35.4, 75.4, 24.6)
+Sseed15 = Team ("Colgate"  , "Patriot", 4.60 , 18.9, 17.0, 28.6, 75.4, 955 , 1995, 320, 815, 50.5, 33.9, 74.2, 22.2)
+
+Sgame1  = Game (Sseed01, Sseed16)
+Sgame2  = Game (Sseed08, Sseed09)
+Sgame3  = Game (Sseed05, Sseed12)
+Sgame4  = Game (Sseed04, Sseed13)
+Sgame5  = Game (Sseed06, Sseed11)
+Sgame6  = Game (Sseed03, Sseed14)
+Sgame7  = Game (Sseed07, Sseed10)
+Sgame8  = Game (Sseed02, Sseed15)
+
+print("South Region")
+print()
+
+print(Sgame1.findWin())
+print(Sgame2.findWin())
+print(Sgame3.findWin())
+print(Sgame4.findWin())
+print(Sgame5.findWin())
+print(Sgame6.findWin())
+print(Sgame7.findWin())
+print(Sgame8.findWin())
+print() 
+
+Sgame9  = Game (Sseed01, Sseed09)
+Sgame10 = Game (Sseed12, Sseed13)
+Sgame11 = Game (Sseed03, Sseed06)
+Sgame12 = Game (Sseed02, Sseed10)
+
+print(Sgame9.findWin())
+print(Sgame10.findWin())
+print(Sgame11.findWin())
+print(Sgame12.findWin())
+print()
+
+Sgame13 = Game (Sseed01, Sseed12)
+Sgame14 = Game (Sseed02, Sseed03)
+
+print(Sgame13.findWin())
+print(Sgame14.findWin())
+print()
+
+Sgame15 = Game (Sseed01, Sseed03)
+print(Sgame15.findWin())
 print()
