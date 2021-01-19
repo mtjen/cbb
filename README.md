@@ -1,18 +1,18 @@
 # cbb
-theoretical predictor of basketball matchups
+theoretical predictor of basketball games
 
-uses personal preferences of what is most important -> adjusted efficiency > steals/turnovers > rebounding > 3s > 2s > free throws
+uses personal preferences of what is most important -> adjusted efficiency > turnovers > rebounding > 3s > 2s > experience > free throws
 
-compared to March Madness 2019 results
+compared with March Madness 2019 results
 
 links for data used: 
 
-Actual Bracket Results            -> https://www.ncaa.com/brackets/print/basketball-men/d1/2019
+Actual Bracket Results    -> https://www.ncaa.com/brackets/print/basketball-men/d1/2019
 
-KenPom College Basketball Ratings -> https://kenpom.com/index.php?y=2019
+Adjusted Efficiency       -> https://kenpom.com/index.php?y=2019
 
-Team Stats                        -> https://www.sports-reference.com/cbb/seasons/2019.html
+Overall Team Stats        -> https://www.sports-reference.com/cbb/seasons/2019.html
 
-Conference Rating Indexes         -> http://realtimerpi.com/2018-2019/rpi_conf_Men.html
+Percentages               -> https://www.teamrankings.com/ncb/team-stats/
 
-Additional Stats                  -> https://www.teamrankings.com/ncb/team-stats/
+Conference Ratings        -> http://realtimerpi.com/2018-2019/rpi_conf_Men.html
